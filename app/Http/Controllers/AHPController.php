@@ -25,54 +25,54 @@ class AHPController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $criteriaA = $request->criteria_a;
-        $criteriaB = $request->criteria_b;
-        $values    = $request->value;
+{
+    $criteriaA = $request->criteria_a;
+    $criteriaB = $request->criteria_b;
+    $values    = $request->value;
 
-        // Hapus semua data lama
-        Ahp::truncate();
+    // Hapus semua data lama
+    Ahp::truncate();
 
-        foreach ($criteriaA as $i => $a) {
+    foreach ($criteriaA as $i => $a) {
 
-            $b = $criteriaB[$i];
-            $val = $values[$i];
+        $b = $criteriaB[$i];
+        $val = $values[$i];
 
-            // Jika user menukar posisi (B harus di kiri)
-            // maka kita simpan versi yg konsisten
-            if ($a > $b) {
-                // swap
-                $temp = $a;
-                $a = $b;
-                $b = $temp;
+        // Jika user menukar posisi (B harus di kiri)
+        // maka kita simpan versi yg konsisten
+        if ($a > $b) {
+            // swap
+            $temp = $a;
+            $a = $b;
+            $b = $temp;
 
-                // nilai harus dibalik
-                $val = 1 / $val;
-            }
-
-            // Simpan A → B
-            Ahp::create([
-                'uuid'            => Str::uuid(),
-                'criteria_a_uuid' => $a,
-                'criteria_b_uuid' => $b,
-                'value'           => $val,
-            ]);
-
-            // Simpan B → A (kebalikannya)
-            Ahp::create([
-                'uuid'            => Str::uuid(),
-                'criteria_a_uuid' => $b,
-                'criteria_b_uuid' => $a,
-                'value'           => 1 / $val,
-            ]);
-
+            // nilai harus dibalik
+            $val = 1 / $val;
         }
 
-        return redirect()->route('ahp.index')
-                        ->with('success', 'Data AHP berhasil disimpan');
+        // Simpan A → B
+        Ahp::create([
+            'uuid'            => Str::uuid(),
+            'criteria_a_uuid' => $a,
+            'criteria_b_uuid' => $b,
+            'value'           => $val,
+        ]);
+
+        // Simpan B → A (kebalikannya)
+        Ahp::create([
+            'uuid'            => Str::uuid(),
+            'criteria_a_uuid' => $b,
+            'criteria_b_uuid' => $a,
+            'value'           => 1 / $val,  // Reciprocal value
+        ]);
     }
 
-   private function calculate($criterias, $pairs) {
+    return redirect()->route('ahp.index')
+                     ->with('success', 'Data AHP berhasil disimpan');
+}
+
+
+  private function calculate($criterias, $pairs) {
     $n = count($criterias);
     
     // 1. MATRIKS PERBANDINGAN

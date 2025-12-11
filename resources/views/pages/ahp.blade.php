@@ -70,6 +70,8 @@
                                                    min="0.000001" 
                                                    max="9" 
                                                    required
+                                                   data-row="{{ $i }}"  {{-- Add this data-row attribute --}}
+                                                   data-col="{{ $j }}"  {{-- Add this data-col attribute --}}
                                                    value="{{ $existing ? $existing->value : '' }}">
                                         </td>
                                     @endif
@@ -279,41 +281,28 @@
 </style>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Validasi input perbandingan
-        document.querySelectorAll(".comparison-input").forEach(input => {
-            input.addEventListener("change", function() {
-                let value = parseFloat(this.value);
-                
-                // Pastikan nilai tidak nol
-                if (value === 0) {
-                    this.value = 1;
-                    alert("Nilai tidak boleh nol. Nilai minimal adalah 0.01 (untuk 1/9) atau 1.");
-                    return;
-                }
-                
-                // Jika input positif
-                if (value > 0) {
-                    // Batas atas (9)
-                    if (value > 9) {
-                        this.value = 9;
-                        alert("Nilai maksimal adalah 9.");
-                    }
-                    // Batas bawah (1/9)
-                    const reciprocalLimit = 1/9; // Sekitar 0.111
-                    if (value < reciprocalLimit && value >= 0.01) {
-                         // Biarkan pengguna memasukkan nilai resiprokal yang valid (e.g., 0.125 atau 0.111)
-                    } else if (value < 1 && value < reciprocalLimit) {
-                         this.value = reciprocalLimit.toFixed(2); // Dibatasi di 1/9
-                         alert("Nilai minimal (untuk kebalikan) adalah 1/9, sekitar 0.11.");
-                    }
-                } else {
-                    // Mencegah input negatif
-                    this.value = 1;
-                    alert("Input harus berupa nilai positif.");
-                }
-            });
+   document.addEventListener("DOMContentLoaded", function () {
+    // For each comparison input, listen for changes
+    document.querySelectorAll(".comparison-input").forEach(input => {
+        input.addEventListener("input", function() {
+            let value = parseFloat(this.value);
+
+            // Ensure that the value is a valid number (between 0 and 9)
+            if (value <= 0 || value > 9) {
+                return; // Only process valid values
+            }
+
+            let row = this.dataset.row;  // Get the row index (from data-row)
+            let col = this.dataset.col;  // Get the column index (from data-col)
+
+            // Find the reciprocal input field (in the opposite position)
+            let reciprocalInput = document.querySelector(`input[data-row="${col}"][data-col="${row}"]`);
+
+            if (reciprocalInput) {
+                reciprocalInput.value = (1 / value).toFixed(4);  // Set reciprocal value
+            }
         });
     });
+});
 </script>
 @endsection
